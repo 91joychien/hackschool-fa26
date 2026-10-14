@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
 const gameRoutes = require("./routes/games");
+const wordRoutes = require("./routes/words")
 const { seedUsers } = require("./db/seed");
 const { connectToDatabase } = require("./db/mongodb");
 
