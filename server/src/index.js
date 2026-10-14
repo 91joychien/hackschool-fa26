@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
 const gameRoutes = require("./routes/games");
-const wordRoutes = require("./routes/words");
+const { seedUsers } = require("./db/seed");
 const { connectToDatabase } = require("./db/mongodb");
 
 const app = express();
@@ -28,6 +28,9 @@ const PORT = process.env.PORT || 3001;
 //initial state check for mongoDB connection
 connectToDatabase()
   .then(() => {
+    if (process.env.SEED_DB === "true") {
+      seedUsers();
+    }
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch((err) => {
