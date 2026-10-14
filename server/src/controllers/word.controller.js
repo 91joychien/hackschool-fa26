@@ -23,7 +23,7 @@ const checkWord = async (req, res) => {
 
     try {
         const response = await fetch(DICTIONARY_API + word, {
-            signal: AbortSignal.timeout(100),
+            signal: AbortSignal.timeout(200),
         });
 
         // 200 = word found, 404 = not a word
