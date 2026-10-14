@@ -13,6 +13,7 @@ app.use(express.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/games", gameRoutes); 
+app.use("/api/words", wordRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "API is running" });

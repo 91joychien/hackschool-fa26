@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import Toast from "./Toast";
 import Board from "./Board/Board";
@@ -15,6 +15,20 @@ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const ROWS = 6;
 const COLS = 5;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+// Ask the server whether the guess is a valid word
+async function isValidWord(word: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/api/words/check/${word.toLowerCase()}`);
+    if (!res.ok) return true;
+    const data: { valid: boolean } = await res.json();
+    return data.valid;
+    // If dictionary API is unavailable -> return true to prevent game from getting stuck
+  } catch {
+    return true;
+  }
+}
 
 /*
   Game component for the Wordle game.
@@ -45,6 +59,9 @@ export default function Game() {
   // State for game over status
   const [gameOver, setGameOver] = useState<boolean>(false);
 
+  // Prevents multiple submits while a word is being checked
+  const checkingRef = useRef<boolean>(false);
+
 
   // Handler for key presses (both physical and virtual keyboard)
   const handleKey = (key: string): void => {
@@ -57,8 +74,12 @@ export default function Game() {
 
     if (key === "ENTER") {
       if (currentCol !== COLS) { setToast("Not enough letters"); return; }
-      else { submitRow(); return; }
+      checkAndSubmit();
+      return;
     }
+
+    // Ignore typing while a guess is being checked
+    if (checkingRef.current) return;
 
     if (key === "BACKSPACE") {
       if (currentCol === 0) return;
@@ -117,6 +138,20 @@ export default function Game() {
       setToast("Couldn't save your game");
     }
   };
+
+  // Check if the word is valid
+  const checkAndSubmit = async (): Promise<void> => {
+    if (checkingRef.current) return;
+    checkingRef.current = true;
+
+    const guess = rows[currentRow].map(t => t.letter).join("");
+    const valid = guess === solution || await isValidWord(guess);
+
+    checkingRef.current = false;
+    if (!valid) { setToast("Not in word list"); return; }
+    submitRow();
+  };
+
 
   // Function to submit the current row and update game state
   const submitRow = (): void => {
