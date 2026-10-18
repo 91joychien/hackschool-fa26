@@ -1,5 +1,16 @@
 const User = require("../models/userModel");
 
+const expectedFields = ["email", "username", "password", "bio", "streak", "past_games", "created_at"];
+
+const actualFields = Object.keys(User.schema.paths);
+const missing = expectedFields.filter((f) => !actualFields.includes(f));
+
+if (missing.length) {
+  console.error("Missing fields:", missing);
+} else {
+  console.log("You're user model works great!");
+}
+
 const getUsers = async (req, res) => {
     const users = await User.find();
     if (users.length === 0)
