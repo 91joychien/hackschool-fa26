@@ -3,6 +3,9 @@ const { checkWord } = require("../controllers/word.controller");
 
 const router = express.Router();
 
-router.get("/check/:word", checkWord);
+/** 
+ * TODO (Step 1): Create the spell check route
+ *  Register a GET route at "/check/:word" that is handled by checkWord
+ */ 
 
 module.exports = router;

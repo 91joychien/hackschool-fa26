@@ -1,44 +1,30 @@
 const fs = require("fs");
 const path = require("path");
 
-// Valid words/dictionary lookup using Free Dictionary API
 const DICTIONARY_API = "https://api.dictionaryapi.dev/api/v2/entries/en/";
 
-// Backup list of 5-letter English words, used when the dictionary API is down (from an-array-of-english-words).
+// Backup list of ~12,000 five-letter words, used if the dictionary API is down.
 const FALLBACK_WORDS = new Set(
     fs.readFileSync(path.join(__dirname, "../data/words.txt"), "utf8").split("\n")
 );
 
-// Simple in-memory cache to prevent calling API too much
-const cache = new Map();
-
 const checkWord = async (req, res) => {
-    const word = (req.params.word || "").toLowerCase();
+    // TODO (Step 2): Read and store the word from the URL as a lowercase string
 
-    if (!/^[a-z]{5}$/.test(word))
-        return res.status(400).json({ error: "Word must be exactly 5 letters." });
+    // TODO (Step 3): Validate the input
 
-    if (cache.has(word))
-        return res.json({ word, valid: cache.get(word), source: "cache" });
+    // TODO (Step 5a): Wrap Step 4 in try { ... } catch (err) { ... }
 
-    try {
-        const response = await fetch(DICTIONARY_API + word, {
-            signal: AbortSignal.timeout(200),
-        });
+    /** TODO (Step 4): Call dictionary API
+     *  Send a request with fetch and WAIT for it with await.
+     */ 
 
-        // 200 = word found, 404 = not a word
-        if (response.status === 200 || response.status === 404) {
-            const valid = response.status === 200;
-            cache.set(word, valid);
-            return res.json({ word, valid, source: "api" });
-        }
-
-        console.error(`Dictionary API returned status ${response.status}; using fallback word list.`);
-    // API unavailable -> check local word list as fallback
-    } catch (err) {
-        console.error("Dictionary API request failed; using fallback word list:", err.cause || err.message);
-    }
-    res.json({ word, valid: FALLBACK_WORDS.has(word), source: "fallback" });
+    /** 
+     * TODO (Step 5b): Add fallback after try/catch
+     * If we reach this line, the dictionary API didn't give us an answer
+     * Check our local word list instead and respond with:
+     * { word, valid: <is the word in FALLBACK_WORDS?>, source: "fallback" }
+     */ 
 };
 
 module.exports = { checkWord };
